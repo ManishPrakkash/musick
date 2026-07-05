@@ -9,6 +9,8 @@ mkdir -p "$INSTALL_DIR" "$CONFIG_DIR" "$SYSTEMD_DIR" "$HOME/.cache/musick"
 
 NEEDED=()
 have playerctl || NEEDED+=("playerctl")
+have curl || NEEDED+=("curl")
+dpkg -l | grep -q "^ii.*webp-pixbuf-loader" 2>/dev/null || NEEDED+=("webp-pixbuf-loader")
 python3 - <<'PY' >/dev/null 2>&1 || NEEDED+=("python3-gi" "gir1.2-gtk-3.0" "gir1.2-gtklayershell-0.1")
 import gi
 gi.require_version("Gtk","3.0")

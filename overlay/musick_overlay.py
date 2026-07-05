@@ -125,7 +125,10 @@ class MusicOverlay(Gtk.Window):
         try:
             pixbuf=GdkPixbuf.Pixbuf.new_from_file_at_scale(COVER_FILE, self.cover_size, self.cover_size, True)
             self.cover.set_from_pixbuf(pixbuf); self.cover.show(); self.cover.queue_draw(); self.queue_draw(); self.cover_loaded=True
-        except Exception:
+        except Exception as e:
+            try:
+                with open(os.path.join(CACHE_DIR, "error.log"), "a", encoding="utf-8") as f: f.write(f"Load error: {e}\n")
+            except: pass
             self.clear_cover()
 
     def refresh(self):

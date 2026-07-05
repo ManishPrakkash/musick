@@ -50,7 +50,7 @@ if [ "$TRACK_ID" != "$OLD_TRACK" ] || [ ! -f "$COVER_FILE" ]; then
       B64_DATA="${ART_URL#*,}"
       python3 -c 'import urllib.parse, base64, sys; sys.stdout.buffer.write(base64.b64decode(urllib.parse.unquote(sys.argv[1])))' "$B64_DATA" > "$TMP_COVER" 2>/dev/null || true
     else
-      command -v curl >/dev/null 2>&1 && curl -L --silent --max-time 5 --output "$TMP_COVER" "$ART_URL" 2>/dev/null || true
+      command -v curl >/dev/null 2>&1 && curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" -L --silent --max-time 5 --output "$TMP_COVER" "$ART_URL" 2>/dev/null || true
     fi
     [ -f "$TMP_COVER" ] && mv "$TMP_COVER" "$COVER_FILE" || rm -f "$COVER_FILE"
   else
