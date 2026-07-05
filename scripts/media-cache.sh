@@ -45,6 +45,9 @@ if [ "$TRACK_ID" != "$OLD_TRACK" ] || [ ! -f "$COVER_FILE" ]; then
     if [[ "$ART_URL" == file://* ]]; then
       LOCAL_PATH="${ART_URL#file://}"
       [ -f "$LOCAL_PATH" ] && cp "$LOCAL_PATH" "$TMP_COVER" 2>/dev/null || true
+    elif [[ "$ART_URL" == data:image/*;base64,* ]]; then
+      B64_DATA="${ART_URL#*,}"
+      echo "$B64_DATA" | base64 -d > "$TMP_COVER" 2>/dev/null || true
     else
       command -v curl >/dev/null 2>&1 && curl -L --silent --max-time 5 --output "$TMP_COVER" "$ART_URL" 2>/dev/null || true
     fi
