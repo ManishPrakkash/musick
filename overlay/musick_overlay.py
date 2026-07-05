@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-import os, gi
+import os
+
+# GNOME Wayland strictly prohibits window positioning. We must force X11 (XWayland) 
+# so the widget can position itself at the bottom-left correctly.
+if os.environ.get("XDG_SESSION_TYPE") == "wayland":
+    desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
+    if "gnome" in desktop or "ubuntu" in desktop:
+        os.environ["GDK_BACKEND"] = "x11"
+
+import gi
 gi.require_version("Gtk", "3.0")
 try:
     gi.require_version("GtkLayerShell", "0.1")
@@ -86,6 +95,8 @@ class MusicOverlay(Gtk.Window):
     def build_ui(self):
         self.outer=Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=22); self.outer.set_name("music-card")
         self.cover=Gtk.Image(); self.cover.set_pixel_size(self.cover_size)
+        self.cover.set_size_request(self.cover_size, self.cover_size)
+        self.cover.set_halign(Gtk.Align.CENTER); self.cover.set_valign(Gtk.Align.CENTER)
         self.text_box=Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6); self.text_box.set_valign(Gtk.Align.CENTER)
         self.title=Gtk.Label(label=""); self.title.set_xalign(0); self.title.set_name("music-title"); self.title.set_max_width_chars(self.title_max_chars); self.title.set_ellipsize(Pango.EllipsizeMode.END)
         self.artist=Gtk.Label(label=""); self.artist.set_xalign(0); self.artist.set_name("music-artist"); self.artist.set_max_width_chars(self.artist_max_chars); self.artist.set_ellipsize(Pango.EllipsizeMode.END)
