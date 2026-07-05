@@ -67,6 +67,8 @@ class MusicOverlay(Gtk.Window):
         else:
             self.set_type_hint(Gdk.WindowTypeHint.DOCK)
             self.set_keep_below(True)
+            self.set_gravity(Gdk.Gravity.SOUTH_WEST)
+            self.set_position(Gtk.WindowPosition.NONE)
             self.connect("size-allocate", self.on_size_allocate)
         self.last_title=""; self.last_artist=""; self.last_track_id=""; self.cover_loaded=False
         self.build_ui(); self.apply_css()
