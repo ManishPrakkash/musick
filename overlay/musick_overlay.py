@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 import os, gi
 gi.require_version("Gtk", "3.0")
-gi.require_version("GtkLayerShell", "0.1")
-from gi.repository import Gtk, Gdk, GLib, GtkLayerShell, GdkPixbuf, Pango
+try:
+    gi.require_version("GtkLayerShell", "0.1")
+    from gi.repository import GtkLayerShell
+    HAS_LAYER_SHELL = True
+except ValueError:
+    HAS_LAYER_SHELL = False
+from gi.repository import Gtk, Gdk, GLib, GdkPixbuf, Pango
 
 CACHE_DIR=os.path.expanduser("~/.cache/musick")
 STATE_FILE=os.path.join(CACHE_DIR,"state")
@@ -50,17 +55,31 @@ class MusicOverlay(Gtk.Window):
         self.set_skip_taskbar_hint(True); self.set_skip_pager_hint(True); self.stick()
         screen=self.get_screen(); visual=screen.get_rgba_visual()
         if visual and screen.is_composited(): self.set_visual(visual)
-        GtkLayerShell.init_for_window(self)
-        GtkLayerShell.set_layer(self, GtkLayerShell.Layer.BACKGROUND)
-        GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, True)
-        GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.BOTTOM, True)
-        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.margin_left)
-        GtkLayerShell.set_margin(self, GtkLayerShell.Edge.BOTTOM, self.margin_bottom)
-        GtkLayerShell.set_namespace(self, "musick-overlay")
-        GtkLayerShell.set_exclusive_zone(self, 0)
+        if HAS_LAYER_SHELL and GtkLayerShell.is_supported():
+            GtkLayerShell.init_for_window(self)
+            GtkLayerShell.set_layer(self, GtkLayerShell.Layer.BACKGROUND)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.LEFT, True)
+            GtkLayerShell.set_anchor(self, GtkLayerShell.Edge.BOTTOM, True)
+            GtkLayerShell.set_margin(self, GtkLayerShell.Edge.LEFT, self.margin_left)
+            GtkLayerShell.set_margin(self, GtkLayerShell.Edge.BOTTOM, self.margin_bottom)
+            GtkLayerShell.set_namespace(self, "musick-overlay")
+            GtkLayerShell.set_exclusive_zone(self, 0)
+        else:
+            self.set_type_hint(Gdk.WindowTypeHint.DOCK)
+            self.set_keep_below(True)
+            self.connect("size-allocate", self.on_size_allocate)
         self.last_title=""; self.last_artist=""; self.last_track_id=""; self.cover_loaded=False
         self.build_ui(); self.apply_css()
         GLib.timeout_add(self.refresh_ms, self.refresh); self.refresh()
+
+    def on_size_allocate(self, widget, allocation):
+        display = Gdk.Display.get_default()
+        monitor = display.get_primary_monitor()
+        if monitor:
+            geom = monitor.get_geometry()
+            x = geom.x + self.margin_left
+            y = geom.y + geom.height - allocation.height - self.margin_bottom
+            self.move(x, y)
 
     def build_ui(self):
         self.outer=Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=22); self.outer.set_name("music-card")
