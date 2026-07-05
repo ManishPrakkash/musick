@@ -15,28 +15,54 @@ hide_widget() {
   exit 0
 }
 
-PLAYER="$(playerctl -l 2>/dev/null | while read -r p; do
-  status="$(playerctl -p "$p" status 2>/dev/null || true)"
-  [ "$status" = "Playing" ] && echo "$p" && break
-done)"
-[ -z "${PLAYER:-}" ] && hide_widget
+PLAYERS="$(playerctl -l 2>/dev/null || true)"
+PLAYER=""
+if [ -n "$PLAYERS" ]; then
+  PLAYER="$(echo "$PLAYERS" | while read -r p; do
+    status="$(playerctl -p "$p" status 2>/dev/null || true)"
+    if [ "$status" = "Playing" ]; then
+      echo "$p"
+      break
+    fi
+  done || true)"
+fi
+
+if [ -z "${PLAYER:-}" ]; then
+  hide_widget
+fi
+
 STATUS="$(playerctl -p "$PLAYER" status 2>/dev/null || true)"
-[ "$STATUS" != "Playing" ] && hide_widget
+if [ "$STATUS" != "Playing" ]; then
+  hide_widget
+fi
 
 TITLE="$(playerctl -p "$PLAYER" metadata xesam:title 2>/dev/null || true)"
 ARTIST="$(playerctl -p "$PLAYER" metadata xesam:artist 2>/dev/null || true)"
 PLAYER_NAME="$(playerctl -p "$PLAYER" metadata --format '{{playerName}}' 2>/dev/null || true)"
 ART_URL="$(playerctl -p "$PLAYER" metadata mpris:artUrl 2>/dev/null || true)"
 TRACK_ID="$(playerctl -p "$PLAYER" metadata mpris:trackid 2>/dev/null || true)"
-[ -z "$TITLE" ] && hide_widget
-[ -z "$ARTIST" ] && ARTIST="Unknown Artist"
-[ -z "$PLAYER_NAME" ] && PLAYER_NAME="Media"
-[ -z "$TRACK_ID" ] && TRACK_ID="${TITLE}_${ARTIST}"
+
+if [ -z "$TITLE" ]; then
+  hide_widget
+fi
+
+if [ -z "$ARTIST" ]; then
+  ARTIST="Unknown Artist"
+fi
+if [ -z "$PLAYER_NAME" ]; then
+  PLAYER_NAME="Media"
+fi
+if [ -z "$TRACK_ID" ]; then
+  TRACK_ID="${TITLE}_${ARTIST}"
+fi
 
 printf "%s\n%s\n%s\n" "$(printf '%s' "$TITLE" | cut -c1-120)" "$(printf '%s' "$ARTIST" | cut -c1-80)" "$PLAYER_NAME" > "$INFO_FILE"
 echo "show" > "$STATE_FILE"
+
 OLD_TRACK=""
-[ -f "$TRACK_FILE" ] && OLD_TRACK="$(cat "$TRACK_FILE" 2>/dev/null || true)"
+if [ -f "$TRACK_FILE" ]; then
+  OLD_TRACK="$(cat "$TRACK_FILE" 2>/dev/null || true)"
+fi
 echo "$TRACK_ID" > "$TRACK_FILE"
 
 if [ "$TRACK_ID" != "$OLD_TRACK" ] || [ ! -f "$COVER_FILE" ]; then
