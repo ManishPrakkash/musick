@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Musick cache updater periodically
+
+[Timer]
+OnBootSec=2s
+OnUnitActiveSec=500ms
+AccuracySec=100ms
+Unit=musick-cache.service
+
+[Install]
+WantedBy=timers.target

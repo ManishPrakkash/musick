@@ -1,0 +1,6 @@
+[Unit]
+Description=Musick cache updater
+
+[Service]
+Type=oneshot
+ExecStart=@@INSTALL_DIR@@/media-cache.sh

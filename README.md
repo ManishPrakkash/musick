@@ -1,0 +1,1 @@
+Musick desktop widget scaffold.
