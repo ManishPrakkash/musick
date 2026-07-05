@@ -31,6 +31,7 @@ cp "$PROJECT_DIR/systemd/musick-cache.timer" "$SYSTEMD_DIR/musick-cache.timer"
 sed "s|@@INSTALL_DIR@@|$INSTALL_DIR|g" "$PROJECT_DIR/systemd/musick-overlay.service" > "$SYSTEMD_DIR/musick-overlay.service"
 
 systemctl --user daemon-reload
-systemctl --user enable --now musick-cache.timer
-systemctl --user enable --now musick-overlay.service
+systemctl --user daemon-reload
+systemctl --user enable musick-cache.timer musick-overlay.service
+systemctl --user restart musick-cache.timer musick-cache.service musick-overlay.service
 green "Musick installed."
