@@ -1,7 +1,7 @@
 <div align="center">
   <img src="./docs/banner.png" alt="Musick Banner" width="100%" style="border-radius: 12px;"/>
   <br><br>
-  <p><b>A modern, sleek, and elegant desktop music widget for Linux (Ubuntu, GNOME, Wayland, and X11).</b></p>
+  <p><b>A modern, sleek, and elegant desktop music widget for Linux (Ubuntu, GNOME, Wayland, and X11)</b></p>
 </div>
 
 ---
